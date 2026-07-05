@@ -1,0 +1,24 @@
+services:
+  chiefflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=sqlite:///./chiefflow.db
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - GEMMA_API_URL=${GEMMA_API_URL:-}
+      - GEMMA_API_KEY=${GEMMA_API_KEY:-}
+      - AMD_GPU_API_URL=${AMD_GPU_API_URL:-}
+      - AMD_GPU_API_KEY=${AMD_GPU_API_KEY:-}
+      - FIREWORKS_API_URL=${FIREWORKS_API_URL:-https://api.fireworks.ai/inference/v1/chat/completions}
+      - FIREWORKS_API_KEY=${FIREWORKS_API_KEY:-}
+      - CORS_ORIGINS=["*"]
+    volumes:
+      - chiefflow_data:/app
+    restart: unless-stopped
+
+volumes:
+  chiefflow_data:
