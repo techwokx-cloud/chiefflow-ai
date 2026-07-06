@@ -93,8 +93,8 @@ require human approval before execution — see `HIGH_RISK_INTENTS` in
 Set these in `.env` (root, used by `docker-compose.yml`) or `backend/.env`:
 
 ```
-GEMMA_API_URL=...          # OpenAI-compatible chat completions endpoint
-GEMMA_API_KEY=...
+GEMMA_API_URL=https://api.fireworks.ai/inference/v1/chat/completions
+GEMMA_API_KEY=...          # same key as FIREWORKS_API_KEY - Gemma is served via Fireworks (AMD-hosted)
 AMD_GPU_API_URL=...        # your AMD Developer Cloud / ROCm inference endpoint
 AMD_GPU_API_KEY=...
 FIREWORKS_API_URL=https://api.fireworks.ai/inference/v1/chat/completions
@@ -102,6 +102,8 @@ FIREWORKS_API_KEY=...
 ```
 
 All three are OpenAI-compatible `chat/completions` clients (see `backend/app/ai/providers.py`).
+Per the AMD Developer Hackathon guidance, Gemma models are accessed **through Fireworks AI**
+(hosted on AMD hardware) rather than Google's own API - no separate Google API key needed.
 
 ## Local Development (without Docker)
 

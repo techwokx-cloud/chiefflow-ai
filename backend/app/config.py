@@ -19,9 +19,9 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60 * 24
 
     # --- AI Model Routing (see BUSINESS_RULE: cheapest capable model wins) ---
-    gemma_api_url: str = ""
+    gemma_api_url: str = "https://api.fireworks.ai/inference/v1/chat/completions"
     gemma_api_key: str = ""
-    gemma_model: str = "gemma2-9b-it"
+    gemma_model: str = "accounts/fireworks/models/gemma-4-31b-it"
 
     amd_gpu_api_url: str = ""       # Open model served on AMD Developer Cloud (ROCm)
     amd_gpu_api_key: str = ""
