@@ -32,7 +32,13 @@ class Settings(BaseSettings):
     fireworks_model: str = "accounts/fireworks/models/llama-v3p1-70b-instruct"
 
     upload_dir: str = "./uploads"
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: str = "*"  # comma-separated if multiple, e.g. "https://a.com,https://b.com"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        if self.cors_origins.strip() == "*":
+            return ["*"]
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     class Config:
         env_file = ".env"

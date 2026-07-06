@@ -15,11 +15,14 @@ left unprocessed. Every decision is logged with the tier + model actually
 used, which powers the Analytics "cost saved" and "model usage" metrics.
 """
 import time
+import logging
 from dataclasses import dataclass
 from typing import Literal
 
 from app.ai import providers
 from app.ai import local_engine
+
+logger = logging.getLogger("chiefflow.ai_router")
 
 Tier = Literal["simple", "moderate", "complex"]
 
@@ -69,7 +72,8 @@ async def complete(system: str, user: str, tier: Tier) -> AIResult:
                 latency_ms=latency,
                 degraded=candidate_tier != tier,
             )
-        except Exception:
+        except Exception as e:
+            logger.warning(f"AI provider '{candidate_tier}' failed, falling back: {type(e).__name__}: {e}")
             continue
 
     # Nothing configured / everything failed -> deterministic local engine.

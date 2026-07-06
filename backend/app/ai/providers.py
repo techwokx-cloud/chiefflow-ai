@@ -10,7 +10,7 @@ import httpx
 from app.config import get_settings
 
 settings = get_settings()
-TIMEOUT = httpx.Timeout(20.0)
+TIMEOUT = httpx.Timeout(8.0)
 
 
 async def _chat(url: str, api_key: str, model: str, system: str, user: str) -> str:

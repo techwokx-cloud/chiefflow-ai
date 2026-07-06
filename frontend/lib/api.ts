@@ -6,23 +6,29 @@ const TOKEN_KEY = "chiefflow_demo_token";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "";
 let inflightAuth: Promise<string> | null = null;
 
-async function getToken(): Promise<string> {
+async function getToken(forceRefresh = false): Promise<string> {
   if (typeof window === "undefined") return "";
-  const cached = window.localStorage.getItem(TOKEN_KEY);
-  if (cached) return cached;
+  if (forceRefresh) {
+    window.localStorage.removeItem(TOKEN_KEY);
+    inflightAuth = null;
+  } else {
+    const cached = window.localStorage.getItem(TOKEN_KEY);
+    if (cached) return cached;
+  }
 
   if (!inflightAuth) {
     inflightAuth = fetch(`${API_BASE}/api/auth/demo-login`, { method: "POST" })
       .then((r) => r.json())
       .then((data) => {
         window.localStorage.setItem(TOKEN_KEY, data.access_token);
+        inflightAuth = null;
         return data.access_token as string;
       });
   }
   return inflightAuth;
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, _retried = false): Promise<T> {
   const token = await getToken();
   const res = await fetch(`${API_BASE}/api${path}`, {
     ...options,
@@ -32,6 +38,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       ...(options.headers || {}),
     },
   });
+
+  if (res.status === 401 && !_retried) {
+    // Cached token is stale/invalid (e.g. server JWT_SECRET rotated on redeploy).
+    // Force a fresh login once and retry the same request before giving up.
+    await getToken(true);
+    return request<T>(path, options, true);
+  }
+
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`API ${path} failed: ${res.status} ${text}`);
