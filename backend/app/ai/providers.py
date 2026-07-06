@@ -46,17 +46,22 @@ async def _chat_gemini_native(url: str, api_key: str, model: str, system: str, u
     - endpoint is {base}/v1beta/models/{model}:generateContent?key={api_key}
     - request body uses "contents"/"parts", not OpenAI's "messages"
     - response uses "candidates"/"content"/"parts", not "choices"/"message"
+
+    Note: Gemma models served via this API have inconsistent support for the
+    separate systemInstruction field (some return 500s), so the system prompt
+    is folded directly into the user content instead - the safer, more
+    universally-supported shape.
     """
     base = url.rstrip("/")
     endpoint = f"{base}/v1beta/models/{model}:generateContent?key={api_key}"
+    combined_text = f"{system}\n\n{user}" if system else user
 
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
         resp = await client.post(
             endpoint,
             headers={"Content-Type": "application/json"},
             json={
-                "contents": [{"role": "user", "parts": [{"text": user}]}],
-                "systemInstruction": {"parts": [{"text": system}]},
+                "contents": [{"parts": [{"text": combined_text}]}],
                 "generationConfig": {"temperature": 0.2, "maxOutputTokens": 600},
             },
         )

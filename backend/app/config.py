@@ -29,7 +29,7 @@ class Settings(BaseSettings):
 
     fireworks_api_url: str = "https://api.fireworks.ai/inference/v1/chat/completions"
     fireworks_api_key: str = ""
-    fireworks_model: str = "accounts/fireworks/models/llama-v3p1-70b-instruct"
+    fireworks_model: str = "accounts/fireworks/models/llama-v3p1-8b-instruct"
 
     upload_dir: str = "./uploads"
     cors_origins: str = "*"  # comma-separated if multiple, e.g. "https://a.com,https://b.com"
