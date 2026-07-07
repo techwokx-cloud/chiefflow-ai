@@ -88,6 +88,7 @@ export default function Landing() {
         <div className="flex items-center justify-center gap-10 text-sm text-slate-300 flex-wrap">
           <span>AMD Developer Cloud</span><span>Fireworks AI</span><span>Gemma</span><span>ROCm</span>
         </div>
+        <div className="text-center text-[10px] text-muted/60 mt-6">Built with Claude AI</div>
       </section>
     </main>
   );

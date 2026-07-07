@@ -57,6 +57,9 @@ export default function Sidebar() {
             <div className="text-[10px] text-muted">Demo Workspace</div>
           </div>
         </div>
+        <div className="px-3 mt-3 text-[9.5px] text-muted/70">
+          Built with Claude AI
+        </div>
       </div>
     </aside>
   );
