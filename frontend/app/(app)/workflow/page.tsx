@@ -32,6 +32,22 @@ function WorkflowDetailInner() {
     try {
       const updated = await api.approve(id, approve);
       setItem(updated);
+    } catch (e) {
+      alert(`Failed to ${approve ? "approve" : "reject"} this item. Please try again.`);
+      console.error(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const reprocess = async () => {
+    setBusy(true);
+    try {
+      const updated = await api.reprocess(id);
+      setItem(updated);
+    } catch (e) {
+      alert("Reprocessing failed. This can happen if the AI provider is slow to respond - please try again in a few seconds.");
+      console.error(e);
     } finally {
       setBusy(false);
     }
@@ -144,11 +160,11 @@ function WorkflowDetailInner() {
         </div>
 
         <button
-          onClick={async () => { setBusy(true); setItem(await api.reprocess(id)); setBusy(false); }}
+          onClick={reprocess}
           disabled={busy}
           className="flex items-center gap-1.5 text-xs text-muted hover:text-text disabled:opacity-50"
         >
-          <RefreshCcw size={13} /> Reprocess with AI
+          <RefreshCcw size={13} className={busy ? "animate-spin" : ""} /> {busy ? "Reprocessing..." : "Reprocess with AI"}
         </button>
       </div>
     </>
