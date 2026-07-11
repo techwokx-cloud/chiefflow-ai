@@ -9,10 +9,10 @@ services:
       - PORT=8000
       - DATABASE_URL=sqlite:///./chiefflow.db
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
-      # Set the base URL only (no /chat/completions)
-      - FIREWORKS_API_URL=${FIREWORKS_API_URL:-https://api.fireworks.ai/inference/v1}
+      # Full URL including /chat/completions - required, no path is appended by our code
+      - FIREWORKS_API_URL=${FIREWORKS_API_URL:-https://api.fireworks.ai/inference/v1/chat/completions}
       - FIREWORKS_API_KEY=${FIREWORKS_API_KEY}
-      - GEMMA_API_URL=${GEMMA_API_URL:-https://api.fireworks.ai/inference/v1}
+      - GEMMA_API_URL=${GEMMA_API_URL:-https://api.fireworks.ai/inference/v1/chat/completions}
       - GEMMA_API_KEY=${GEMMA_API_KEY}
       - AMD_GPU_API_URL=${AMD_GPU_API_URL:-}
       - AMD_GPU_API_KEY=${AMD_GPU_API_KEY:-}

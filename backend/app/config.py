@@ -12,20 +12,23 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 1440
 
     # --- AI Model Routing ---
-    # Set these to empty strings so they are REQUIRED from the environment
-    # If they are missing, Pydantic will raise an error rather than 
-    # using a faulty hardcoded URL.
-    gemma_api_url: str = "https://api.fireworks.ai/inference/v1"
+    # Full URLs including /chat/completions - our code does not append any
+    # path, it posts directly to whatever's here. A base-only URL 404s.
+    gemma_api_url: str = "https://api.fireworks.ai/inference/v1/chat/completions"
     gemma_api_key: str = ""
-    gemma_model: str = "accounts/fireworks/models/gemma-4-31b-it"
+    # Verified working: dedicated Fireworks deployment (scale-to-zero).
+    # The generic catalog ID (accounts/fireworks/models/gemma-4-31b-it)
+    # returns "not found/inaccessible" - it requires this deployment path.
+    gemma_model: str = "accounts/techwokx-cypdje8ujre/deployments/foync9bv"
 
     amd_gpu_api_url: str = ""
     amd_gpu_api_key: str = ""
-    amd_gpu_model: str = "llama-3.1-8b-instruct"
+    amd_gpu_model: str = "NousResearch/Meta-Llama-3.1-8B-Instruct"
 
-    fireworks_api_url: str = "https://api.fireworks.ai/inference/v1"
+    fireworks_api_url: str = "https://api.fireworks.ai/inference/v1/chat/completions"
     fireworks_api_key: str = ""
-    fireworks_model: str = "accounts/fireworks/models/llama-v3p1-8b-instruct"
+    # Verified working and confirmed present in the account's model catalog.
+    fireworks_model: str = "accounts/fireworks/models/gpt-oss-120b"
 
     upload_dir: str = "./uploads"
     cors_origins: str = "*"
