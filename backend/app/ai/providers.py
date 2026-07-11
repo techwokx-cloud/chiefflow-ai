@@ -11,13 +11,19 @@ from app.config import get_settings
 
 settings = get_settings()
 TIMEOUT = httpx.Timeout(8.0)
+# Gemma runs on a scale-to-zero dedicated Fireworks deployment - the first
+# request after 60+ minutes idle needs a real GPU cold-start, which
+# routinely takes longer than the fast 8s timeout used for everything
+# else. Give it real room rather than silently falling back on every
+# first-touch request.
+GEMMA_TIMEOUT = httpx.Timeout(45.0)
 
 
-async def _chat(url: str, api_key: str, model: str, system: str, user: str) -> str:
+async def _chat(url: str, api_key: str, model: str, system: str, user: str, timeout: httpx.Timeout = TIMEOUT) -> str:
     if not url or not api_key:
         raise RuntimeError("provider not configured")
 
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with httpx.AsyncClient(timeout=timeout) as client:
         resp = await client.post(
             url,
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
@@ -40,7 +46,7 @@ async def _chat(url: str, api_key: str, model: str, system: str, user: str) -> s
         return data["choices"][0]["message"]["content"]
 
 
-async def _chat_gemini_native(url: str, api_key: str, model: str, system: str, user: str) -> str:
+async def _chat_gemini_native(url: str, api_key: str, model: str, system: str, user: str, timeout: httpx.Timeout = TIMEOUT) -> str:
     """
     Google's Generative Language API is NOT OpenAI-compatible:
     - endpoint is {base}/v1beta/models/{model}:generateContent?key={api_key}
@@ -56,7 +62,7 @@ async def _chat_gemini_native(url: str, api_key: str, model: str, system: str, u
     endpoint = f"{base}/v1beta/models/{model}:generateContent?key={api_key}"
     combined_text = f"{system}\n\n{user}" if system else user
 
-    async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+    async with httpx.AsyncClient(timeout=timeout) as client:
         resp = await client.post(
             endpoint,
             headers={"Content-Type": "application/json"},
@@ -74,8 +80,8 @@ async def _chat_gemini_native(url: str, api_key: str, model: str, system: str, u
 async def call_gemma(system: str, user: str) -> str:
     url, key, model = settings.gemma_api_url, settings.gemma_api_key, settings.gemma_model
     if "generativelanguage.googleapis.com" in url:
-        return await _chat_gemini_native(url, key, model, system, user)
-    return await _chat(url, key, model, system, user)
+        return await _chat_gemini_native(url, key, model, system, user, timeout=GEMMA_TIMEOUT)
+    return await _chat(url, key, model, system, user, timeout=GEMMA_TIMEOUT)
 
 
 async def call_amd_gpu(system: str, user: str) -> str:
